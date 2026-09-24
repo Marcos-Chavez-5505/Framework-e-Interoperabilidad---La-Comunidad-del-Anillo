@@ -7,7 +7,7 @@ function loadFollowsMap(viewerId) {
   return strapiClient
     .get('/follows', {
       params: {
-        fields: ['id'],
+        fields: ['id', 'documentId'],
         pagination: { pageSize: 100 },
         filters: { follower: { id: { $eq: viewerId } } },
         populate: { following: { fields: ['id'] } },
@@ -17,7 +17,7 @@ function loadFollowsMap(viewerId) {
       const map = {};
       data.data.forEach((follow) => {
         if (follow.following?.id != null) {
-          map[follow.following.id] = follow.id;
+          map[follow.following.id] = follow.documentId;
         }
       });
       return map;
