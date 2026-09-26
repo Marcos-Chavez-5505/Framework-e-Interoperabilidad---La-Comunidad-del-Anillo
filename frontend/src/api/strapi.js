@@ -13,6 +13,22 @@ strapiClient.interceptors.request.use((config) => {
   return config;
 });
 
+const isAuthUrl = (url) => url?.includes('/auth/');
+
+strapiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const hasToken = Boolean(localStorage.getItem('comunidad_token'));
+    if (status === 401 && hasToken && !isAuthUrl(error?.config?.url)) {
+      localStorage.removeItem('comunidad_token');
+      localStorage.removeItem('comunidad_user');
+      window.location.assign('/login');
+    }
+    return Promise.reject(error);
+  },
+);
+
 export function getErrorMessage(error) {
   return (
     error?.response?.data?.error?.message ||

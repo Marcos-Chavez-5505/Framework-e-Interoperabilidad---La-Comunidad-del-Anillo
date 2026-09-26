@@ -57,24 +57,6 @@ export default function Inicio() {
         </div>
       </div>
 
-      <div className="col-12 col-md-6 col-xl-4">
-        <div className="card">
-          <div className="card-body">
-            <div className="d-flex align-items-center gap-3">
-              <div className="rounded-circle p-2 bg-warning d-inline-flex">
-                <i className="align-middle text-white" data-feather="disc"></i>
-              </div>
-              <div>
-                <h2 className="h6 mb-0">Playlists</h2>
-                <p className="text-secondary small mb-0">
-                  Personales y colaborativas (próximamente).
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div className="col-12">
         <div className="card">
           <div className="card-body d-flex flex-wrap gap-2">

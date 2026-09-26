@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
 import useFeather from '../hooks/useFeather';
+import PlayerBar from '../player/PlayerBar';
 
 export default function AppLayout() {
   useFeather();
@@ -25,17 +26,9 @@ export default function AppLayout() {
                 <i className="align-middle text-white" data-feather="music"></i>
               </div>
               <div className="ms-1 text-white fs-6 fw-semibold">
-                La Comunidad del Anillo
+                Synthos
               </div>
             </Link>
-            <button
-              type="button"
-              className="btn btn-secondary rounded-circle btn-close-sidebar"
-              data-ignore="true"
-              aria-label="Cerrar panel"
-            >
-              <i data-feather="x" className="align-middle"></i>
-            </button>
           </div>
         </div>
 
@@ -44,16 +37,30 @@ export default function AppLayout() {
             <Link to="/perfil" className="nav-link d-flex align-items-center gap-3">
               <div className="avatar">
                 {user?.avatar ? (
-                  <img src={user.avatar} alt={user.username} />
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    style={{
+                      width: '2rem',
+                      height: '2rem',
+                      objectFit: 'cover',
+                      borderRadius: '50%',
+                      display: 'block',
+                    }}
+                  />
                 ) : (
                   <div className="avatar-sm bg-primary text-white d-flex align-items-center justify-content-center">
-                    <i data-feather="user" className="align-middle"></i>
+                    {String(user?.username ?? '?').charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
               <div className="d-flex flex-column">
-                <span className="fs-7 overflow-hidden text-nowrap">{user?.username}</span>
-                <span className="fs-8 text-secondary">Mi perfil</span>
+                <span
+                  className="fs-7 overflow-hidden text-nowrap"
+                  style={{ color: '#cfd3dc' }}
+                >
+                  {user?.username}
+                </span>
               </div>
             </Link>
           </div>
@@ -63,6 +70,10 @@ export default function AppLayout() {
               <i data-feather="home" className="align-middle me-2"></i>
               <span>Inicio</span>
             </NavLink>
+            <NavLink to="/musica" className={navLinkClass}>
+              <i data-feather="disc" className="align-middle me-2"></i>
+              <span>Música</span>
+            </NavLink>
             <NavLink to="/personas" className={navLinkClass}>
               <i data-feather="users" className="align-middle me-2"></i>
               <span>Buscar personas</span>
@@ -71,25 +82,12 @@ export default function AppLayout() {
               <i data-feather="user" className="align-middle me-2"></i>
               <span>Mi perfil</span>
             </NavLink>
-            <span className="nav-link disabled">
-              <i data-feather="disc" className="align-middle me-2"></i>
-              <span>Mis playlist (próximamente)</span>
-            </span>
           </nav>
         </div>
       </aside>
 
       <div className="main">
         <nav className="navbar navbar-expand navbar-light navbar-bg">
-          <button
-            type="button"
-            className="btn btn-primary rounded-circle btn-open-sidebar"
-            data-ignore="true"
-            aria-label="Abrir panel"
-          >
-            <i data-feather="menu" className="align-middle"></i>
-          </button>
-
           <div className="navbar-collapse collapse d-flex justify-content-end">
             <div className="dropdown me-3">
               <button
@@ -147,6 +145,8 @@ export default function AppLayout() {
           </div>
         </footer>
       </div>
+
+      <PlayerBar />
     </div>
   );
 }

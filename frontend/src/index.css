@@ -7,3 +7,15 @@ body,
 body {
   margin: 0;
 }
+
+.player-fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1040;
+}
+
+main.content {
+  padding-bottom: 96px;
+}
