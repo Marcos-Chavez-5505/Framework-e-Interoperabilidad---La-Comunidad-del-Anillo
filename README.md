@@ -6,11 +6,13 @@ Prueba de concepto académica que evalúa el uso conjunto de:
 - **React 19 + Vite** como framework frontend.
 - **AdminKit** como template CSS/JS basado en **Bootstrap 5**.
 
-Dominio: aplicación conceptual similar a un *Spotify colaborativo* con tres módulos obligatorios:
+Dominio: aplicación conceptual similar a un *Spotify colaborativo* con al menos tres módulos obligatorios:
 
-1. **Autenticación de usuarios** (Módulo 1 — implementado).
-2. **Reproductor de música** (Módulo 2 — implementado).
-3. **Gestión de playlists** (Módulo 3 — pendiente).
+1. **Autenticación de usuarios** (Módulo 1).
+2. **Reproductor de música** (Módulo 2).
+3. **Búsqueda de usuarios** (Módulo 3).
+   1. ***Follow y Unfollow***
+4. **Búsqueda de canciones** (Módulo 4).
 
 > No es una aplicación de producción: prioriza simplicidad, claridad didáctica y evidencia demostrable.
 
@@ -161,9 +163,3 @@ Si el navegador conserva un JWT emitido con un `JWT_SECRET` distinto (o inválid
 | ---------------------------------- | -------------------------------------------------------------------------------- |
 | `feature/modulo-1-autenticacion` | Módulo 1: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
 | `feature/modulo-2-reproductor`   | Módulo 2: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
-
-## Pendientes
-
-- [ ] Módulo 3: Playlists (personales/celaborativas, invitaciones temporales).
-- [ ] Evidencia de reproducción de audio.
-- [ ] Documentación de decisiones en Git, tablero, presentación e informe.

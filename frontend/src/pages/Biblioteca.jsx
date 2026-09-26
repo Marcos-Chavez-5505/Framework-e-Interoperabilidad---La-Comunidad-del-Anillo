@@ -17,7 +17,7 @@ function TrackRow({ track, indexInList, playing, onPlay }) {
         />
       ) : (
         <div
-          className="rounded bg-primary text-white d-flex align-items-center justify-content-center"
+          className="rounded gradient-card text-white d-flex align-items-center justify-content-center"
           style={{ width: '2.5rem', height: '2.5rem' }}
         >
           <PlayerIcon name="musicNote" size={20} />

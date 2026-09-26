@@ -49,7 +49,7 @@ export default function Inicio() {
               <div>
                 <h2 className="h6 mb-0">Reproductor</h2>
                 <p className="text-secondary small mb-0">
-                  Canciones, álbumes y reproducción (próximamente).
+                  Canciones, álbumes y reproducción.
                 </p>
               </div>
             </div>

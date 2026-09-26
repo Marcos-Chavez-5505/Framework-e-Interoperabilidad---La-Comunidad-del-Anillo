@@ -34,7 +34,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light py-5">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center auth-screen py-5">
       <div className="card auth-card" style={{ maxWidth: '460px', width: '100%' }}>
         <div className="card-body p-4">
           <div className="text-center mb-4">

@@ -6,7 +6,7 @@ export default function PrivateRoute() {
 
   if (loading) {
     return (
-      <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <div className="min-vh-100 d-flex align-items-center justify-content-center auth-screen">
         <div className="spinner-border text-primary" role="status">
           <span className="visually-hidden">Cargando…</span>
         </div>
