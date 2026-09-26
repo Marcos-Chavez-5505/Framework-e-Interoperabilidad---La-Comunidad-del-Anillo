@@ -7,3 +7,290 @@ body,
 body {
   margin: 0;
 }
+
+.player-fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1040;
+}
+
+main.content {
+  padding-bottom: 96px;
+}
+
+/* ============================================================
+   Tema adaptado de frontend/styles.md (aprox. visual)
+   Paleta: fondo oscuro + acento pink. Overrides sobre AdminKit,
+   importados DESPUÉS de @adminkit/core/dist/css/app.css.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Paleta (tokens propios) */
+  --bg-primary: #0e0c10;
+  --bg-sidebar: #2a232e;
+  --bg-surface: #3a3040;
+  --bg-input: #332b38;
+  --text-primary: #ffffff;
+  --text-secondary: #a89bb0;
+  --text-muted: #6f6577;
+  --accent-pink: #e0407e;
+  --accent-pink-soft: #c76a94;
+  --accent-purple: #6f5aa8;
+  --gradient-card: linear-gradient(180deg, #c9bcd1 0%, #8f7f9c 100%);
+  --gradient-card-overlay: linear-gradient(180deg, transparent 40%, #000000cc 100%);
+  --accent-pink-dark: #c7356c;
+
+  /* Bootstrap 5 -> paleta */
+  --bs-body-bg: var(--bg-primary);
+  --bs-body-color: var(--text-primary);
+  --bs-heading-color: var(--text-primary);
+  --bs-body-font-family: 'Inter', 'Poppins', 'Segoe UI', system-ui, sans-serif;
+  --bs-secondary-color: var(--text-secondary);
+  --bs-tertiary-color: var(--text-muted);
+  --bs-primary: var(--accent-pink);
+  --bs-primary-rgb: 224, 64, 126;
+  --bs-secondary: var(--accent-pink-soft);
+  --bs-secondary-rgb: 199, 106, 148;
+  --bs-link-color: var(--accent-pink);
+  --bs-link-hover-color: var(--accent-pink-dark);
+  --bs-focus-ring-color: rgba(224, 64, 126, 0.25);
+  --bs-border-color: var(--bg-surface);
+
+  /* Cards / listas / tablas */
+  --bs-card-bg: var(--bg-sidebar);
+  --bs-card-color: var(--text-primary);
+  --bs-card-border-color: var(--bg-surface);
+  --bs-card-title-color: var(--text-primary);
+  --bs-card-subtitle-color: var(--text-secondary);
+  --bs-card-cap-bg: var(--bg-input);
+  --bs-card-cap-color: var(--text-primary);
+  --bs-list-group-bg: var(--bg-sidebar);
+  --bs-list-group-color: var(--text-primary);
+  --bs-list-group-border-color: var(--bg-surface);
+  --bs-list-group-action-color: var(--text-primary);
+  --bs-list-group-action-hover-bg: var(--bg-surface);
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text-primary);
+  --bs-table-border-color: var(--bg-surface);
+
+  /* Slider (reproductor) */
+  --bs-form-range-track-bg: var(--bg-surface);
+  --bs-form-range-thumb-bg: var(--accent-pink);
+  --bs-form-range-thumb-active-bg: var(--accent-pink);
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--bs-body-font-family);
+}
+
+.auth-screen {
+  background-color: #1e1e1e;
+}
+
+.main {
+  background-color: #1e1e1e;
+}
+
+.bg-sidebar {
+  background-color: var(--bg-sidebar);
+}
+
+/* ---------- Sidebar / navegación ---------- */
+.sidebar {
+  background-color: var(--bg-sidebar);
+}
+
+.sidebar-header {
+  color: var(--text-secondary);
+}
+
+.sidebar .nav-link {
+  color: var(--text-secondary);
+}
+
+.sidebar .nav-link:hover {
+  color: var(--text-primary);
+}
+
+.sidebar .nav-link.active {
+  color: var(--accent-pink);
+  background-color: transparent;
+}
+
+/* ---------- Navbar y footer ---------- */
+.navbar-bg {
+  background-color: var(--bg-sidebar);
+}
+
+.main .footer {
+  background-color: var(--bg-sidebar);
+  color: var(--text-secondary);
+}
+
+.footer a {
+  color: var(--text-secondary);
+}
+
+/* ---------- Botones ---------- */
+.btn-primary {
+  --bs-btn-bg: var(--accent-pink);
+  --bs-btn-border-color: var(--accent-pink);
+  --bs-btn-color: #fff;
+  --bs-btn-hover-bg: var(--accent-pink-dark);
+  --bs-btn-hover-border-color: var(--accent-pink-dark);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-active-bg: var(--accent-pink-dark);
+  --bs-btn-active-border-color: var(--accent-pink-dark);
+  --bs-btn-active-color: #fff;
+  --bs-btn-focus-shadow-rgb: 224, 64, 126;
+  --bs-btn-disabled-bg: var(--accent-pink);
+  --bs-btn-disabled-border-color: var(--accent-pink);
+}
+
+.btn-secondary {
+  --bs-btn-bg: var(--bg-surface);
+  --bs-btn-border-color: var(--bg-surface);
+  --bs-btn-color: var(--text-primary);
+  --bs-btn-hover-bg: #4a3d52;
+  --bs-btn-hover-border-color: #4a3d52;
+  --bs-btn-hover-color: var(--text-primary);
+  --bs-btn-active-bg: #4a3d52;
+  --bs-btn-active-border-color: #4a3d52;
+  --bs-btn-active-color: var(--text-primary);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--text-secondary);
+  --bs-btn-border-color: var(--bg-surface);
+  --bs-btn-hover-color: var(--text-primary);
+  --bs-btn-hover-bg: var(--bg-surface);
+  --bs-btn-hover-border-color: var(--bg-surface);
+  --bs-btn-active-color: var(--text-primary);
+  --bs-btn-active-bg: var(--bg-surface);
+  --bs-btn-active-border-color: var(--bg-surface);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--accent-pink);
+  --bs-btn-border-color: var(--accent-pink);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--accent-pink);
+  --bs-btn-hover-border-color: var(--accent-pink);
+  --bs-btn-focus-shadow-rgb: 224, 64, 126;
+  --bs-btn-active-color: #fff;
+  --bs-btn-active-bg: var(--accent-pink-dark);
+  --bs-btn-active-border-color: var(--accent-pink-dark);
+  --bs-btn-disabled-color: var(--accent-pink);
+  --bs-btn-disabled-border-color: var(--accent-pink);
+}
+
+/* ---------- Formularios ---------- */
+.form-control,
+.form-select {
+  background-color: var(--bg-input);
+  border-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 0 0.25rem rgba(224, 64, 126, 0.25);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%23a89bb0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3E%3C/svg%3E");
+}
+
+/* ---------- Dropdowns ---------- */
+.dropdown-menu {
+  --bs-dropdown-bg: var(--bg-input);
+  --bs-dropdown-border-color: var(--bg-surface);
+  --bs-dropdown-link-color: var(--text-primary);
+  --bs-dropdown-link-hover-color: var(--text-primary);
+  --bs-dropdown-link-hover-bg: var(--bg-surface);
+  --bs-dropdown-link-active-bg: var(--accent-pink);
+  --bs-dropdown-divider-bg: var(--bg-surface);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-surface);
+}
+
+/* ---------- Cards / listas ---------- */
+.card {
+  --bs-card-bg: var(--bg-sidebar);
+  --bs-card-color: var(--text-primary);
+  --bs-card-title-color: var(--text-primary);
+  --bs-card-subtitle-color: var(--text-secondary);
+  --bs-card-cap-bg: var(--bg-input);
+}
+
+.list-group {
+  --bs-list-group-bg: var(--bg-sidebar);
+  --bs-list-group-color: var(--text-primary);
+  --bs-list-group-border-color: var(--bg-surface);
+  --bs-list-group-action-hover-bg: var(--bg-surface);
+}
+
+/* ---------- Alertas ---------- */
+.alert-danger {
+  --bs-alert-bg: #3a2b34;
+  --bs-alert-color: #f3a9c0;
+  --bs-alert-border-color: var(--bg-surface);
+}
+
+.alert-success {
+  --bs-alert-bg: #26332c;
+  --bs-alert-color: #a3d1b6;
+  --bs-alert-border-color: var(--bg-surface);
+}
+
+/* ---------- Reproductor (barra de progreso) ---------- */
+.player-fixed-bottom .form-range::-webkit-slider-runnable-track {
+  background-color: var(--bg-surface);
+}
+
+.player-fixed-bottom .form-range::-webkit-slider-thumb {
+  background-color: var(--accent-pink);
+  border: 0;
+}
+
+.player-fixed-bottom .form-range::-moz-range-track {
+  background-color: var(--bg-surface);
+}
+
+.player-fixed-bottom .form-range::-moz-range-thumb {
+  background-color: var(--accent-pink);
+  border: 0;
+}
+
+.player-fixed-bottom .form-range:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 0.25rem rgba(224, 64, 126, 0.25);
+}
+
+/* ---------- Utilitarios de la paleta ---------- */
+.gradient-card {
+  background: var(--gradient-card);
+}
+
+.gradient-card-overlay {
+  background: var(--gradient-card-overlay);
+}
