@@ -6,12 +6,12 @@ Prueba de concepto académica que evalúa el uso conjunto de:
 - **React 19 + Vite** como framework frontend.
 - **AdminKit** como template CSS/JS basado en **Bootstrap 5**.
 
-Dominio: aplicación conceptual similar a un *Spotify colaborativo* con al menos tres módulos obligatorios:
+Dominio: aplicación conceptual similar a un *Spotify colaborativo* organizada en cuatro módulos demostrables:
 
 1. **Autenticación de usuarios** (Módulo 1).
-2. **Reproductor de música** (Módulo 2).
-3. **Búsqueda de usuarios** (Módulo 3).
-   1. ***Follow y Unfollow***
+2. **Búsqueda de usuarios** (Módulo 2).
+   1. ***Follow y Unfollow de usuarios***
+3. **Reproductor de música** (Módulo 3).
 4. **Búsqueda de canciones** (Módulo 4).
 
 > No es una aplicación de producción: prioriza simplicidad, claridad didáctica y evidencia demostrable.
@@ -82,65 +82,75 @@ Las **concesiones de permisos** realizadas desde el Admin UI se guardan en la ba
 
 ### Checklist — rol "Authenticated" (Configuración → Usuarios y permisos → Roles → Authenticated)
 
-Módulo: **Follow** (`api::follow.follow`):
+**Módulo 1 — Autenticación** (`plugin::users-permissions.user`):
 
-- [ ] create
-- [ ] delete
-- [ ] find
-- [ ] findOne
+- [ ] `updateMe` (edición del propio perfil, `PUT /api/user/me`)
+- [ ] `findOne` (consulta del usuario actual)
 
-Módulo: **Usuarios** (`plugin::users-permissions.user`):
+**Módulo 2 — Búsqueda de usuarios** (`plugin::users-permissions.user`):
 
-- [ ] `updateMe` (edición de perfil propia, `PUT /api/user/me`)
-- [ ] `find` (búsqueda de personas y validación de relaciones)
-- [ ] `findOne`
+- [ ] `find` (búsqueda por username y validación de relaciones)
 - [ ] `count`
 
-### Checklist — Módulo 2 (Biblioteca y reproductor)
+**Módulo 2.1 — Follow** (`api::follow.follow`):
 
-Módulo: **Track** (`api::track.track`):
+- [ ] `create`
+- [ ] `delete`
+- [ ] `find`
+- [ ] `findOne`
 
-- [ ] find
-- [ ] findOne
+**Módulos 3 y 4 — Música** (`api::track.track`, `api::album.album`, `api::artist.artist`, `api::genre.genre`):
 
-Módulo: **Album** (`api::album.album`):
-
-- [ ] find
-- [ ] findOne
-
-Módulo: **Artist** (`api::artist.artist`):
-
-- [ ] find
-- [ ] findOne
-
-Módulo: **Genre** (`api::genre.genre`):
-
-- [ ] find
-- [ ] findOne
+- [ ] `find`
+- [ ] `findOne`
 
 > Si falta `find` sobre el destinatario de una relación, Strapi v5 responde `400 Invalid key ...` (validación `throwRestrictedRelations`); es un comportamiento esperado, no un bug.
 
 ---
 
-## Flujo de prueba del Módulo 1
+## Módulo 1 — Autenticación
 
-1. Registrar un usuario (`/register`).
-2. Iniciar sesión (`/login`) — el JWT se guarda en `localStorage`.
-3. En `/perfil`: editar `username`, `bio` y URL de `avatar` (`PUT /api/user/me`).
-4. En `/personas`: buscar por username y **seguir/dejar de seguir** (`POST`/`DELETE /api/follows`).
+Objetivo: registrar, iniciar sesión, cerrar sesión, consultar y editar el propio perfil.
 
-Endpoints nativos de Strapi usados: `POST /api/auth/local/register`, `POST /api/auth/local`, `GET /api/users/me`. Endpoint personalizado mínimo: `PUT /api/user/me` (v5 no expone edición del propio perfil por vía nativa).
+1. Registrar un usuario (`/register`) → `POST /api/auth/local/register`.
+2. Iniciar sesión (`/login`) → `POST /api/auth/local`; el JWT se guarda en `localStorage` y se adjunta a cada request por axios.
+3. Al entrar, `GET /api/users/me` alimenta el estado global de sesión (`AuthProvider`).
+4. En `/perfil` se editan `username`, `bio` y URL de `avatar` (`PUT /api/user/me`).
 
-## Flujo de prueba del Módulo 2 (Reproductor)
+Endpoints nativos de Strapi: `POST /api/auth/local/register`, `POST /api/auth/local`, `GET /api/users/me`. Endpoint personalizado mínimo: `PUT /api/user/me` (Strapi v5 no expone la edición del propio perfil por vía nativa).
 
-1. Sembrar la biblioteca con el script: `cd backend && node scripts/seed.js` (idempotente: si ya hay tracks, omite). Crea 5 géneros, 5 artistas, 4 álbumes y 10 tracks.
-2. En `/musica` (Biblioteca): buscar por canción/artista y filtrar por género.
-3. Tocar una canción: entra en la cola, aparece la barra fija con controles.
-4. Probar play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
+## Módulo 2 — Búsqueda de usuarios y Follow/Unfollow
+
+Objetivo: encontrar personas por nombre de usuario y seguirlas / dejar de seguirlas.
+
+1. En `/personas` escribir un nombre de usuario → `GET /api/users` con filtro `username $contains` (búsqueda nativa de Strapi).
+2. El resultado oculta al propio usuario y muestra su estado de seguimiento (cargado con `GET /api/follows`).
+3. **Seguir** → `POST /api/follows` con `{ data: { following: <id> } }`: el `follower` se asigna desde la sesión en el controlador.
+4. **Dejar de seguir** → `DELETE /api/follows/:documentId`.
+
+Reglas del content-type `Follow`: no se puede seguirse a uno mismo y no se permiten duplicados (ver `backend/src/api/follow/controllers/follow.js` y `services/follow.js`).
+
+## Módulo 3 — Reproductor de música
+
+Objetivo: reproducir canciones con play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
+
+1. Sembrar la biblioteca: `cd backend && node scripts/seed.js` (idempotente: si ya hay tracks, omite). Crea 5 géneros, 5 artistas, 4 álbumes y 10 tracks.
+2. En `/musica` (Biblioteca), tocar una canción: entra en la cola y aparece la barra fija (`PlayerBar`) con los controles.
+3. Probar play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
 
 El script usa `documentService` de Strapi (crea entradas sin pasar por permisos REST) y datos temáticos: `audio_url` con MP3 públicos estables (SoundHelix) como placeholder —para usar Jamendo solo hay que reemplazar los `audio_url` en `backend/scripts/seed.js`— y `cover` de picsum.photos.
 
-Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), URLs de audio **externas** guardadas en Strapi (sin integrar la API de Jamendo en runtime), estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** se crean con rutas REST estándar de Strapi.
+Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), URLs de audio **externas** guardadas en Strapi (sin integrar la API de Jamendo en runtime), estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** usan rutas REST estándar de Strapi.
+
+## Módulo 4 — Búsqueda de canciones
+
+Objetivo: buscar canciones por título o artista y filtrarlas por género.
+
+1. En `/musica` (Biblioteca) escribir en el buscador → `GET /api/tracks` con filtro `$or` sobre `title` y `artist.name` (`$contains`).
+2. Filtrar por género con el selector → filtro `genre.id $eq`.
+3. Los resultados se muestran ordenados (sort `title:asc`) con `populate` de artist/album/genre y permiten iniciar la reproducción (comparte la pantalla con el Módulo 2).
+
+La búsqueda y el filtrado se resuelven con `filters` y `populate` **nativos** de Strapi, sin endpoints personalizados.
 
 ### Nota sobre sesiones (error "Missing or invalid credentials")
 
@@ -153,13 +163,15 @@ Si el navegador conserva un JWT emitido con un `JWT_SECRET` distinto (o inválid
 - Estado original: template AdminKit `@adminkit/core` importado tal cual (CSS `app.css` + JS `app.js`).
 - Adaptación: el layout reconstruye la estructura HTML de AdminKit (`.wrapper`, `.sidebar`, `.navbar`, `.content`, `.footer`) dentro de componentes React en `frontend/src/layout/AppLayout.jsx`.
 - Los íconos *(feather)* vienen embebidos en `app.js` del template; se reemplazan con `window.feather.replace()` vía `src/hooks/useFeather.js`.
-- El CSS del template de Vite (`index.css` original) se reemplazó por un reset mínimo para no chocar con AdminKit.
+- El CSS del template de Vite (`index.css` original) se reemplazó por un reset mínimo al que se suman los overrides del tema (paleta oscura + acento pink) desde `frontend/src/index.css`, importado **después** de `app.css` para ganar en cascada.
 
 ---
 
 ## Portafolio de ramas / commits
 
-| Rama                               | Contenido                                                                        |
-| ---------------------------------- | -------------------------------------------------------------------------------- |
-| `feature/modulo-1-autenticacion` | Módulo 1: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
-| `feature/modulo-2-reproductor`   | Módulo 2: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
+| Rama                               | Contenido                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------- |
+| `feature/modulo-1-autenticacion` | Módulos 1 y 3: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
+| `feature/modulo-2-reproductor`   | Módulos 2 y 4: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
+
+> Las ramas agrupan los 4 módulos: `feature/modulo-1-autenticacion` contiene los **Módulos 1 y 2** (autenticación, perfil y follows); `feature/modulo-2-reproductor` contiene los **Módulos 3 y 4** (reproductor y búsqueda de canciones).
