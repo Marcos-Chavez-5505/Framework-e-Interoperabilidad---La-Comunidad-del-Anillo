@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { PlayerContext } from './context';
 
 let audioInstance = null;
@@ -18,24 +18,37 @@ export default function PlayerProvider({ children }) {
   const [isRepeat, setIsRepeat] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const draggingRef = useRef(false);
+  const sourceRef = useRef(null);
+  const blobCacheRef = useRef({});
 
   const currentTrack = queue[currentIndex] ?? null;
 
   useEffect(() => {
     const audio = getAudio();
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const onTimeUpdate = () => {
+      if (!draggingRef.current && !audio.seeking) setCurrentTime(audio.currentTime);
+    };
     const onLoadedMetadata = () =>
       setDuration(Number.isFinite(audio.duration) ? audio.duration : 0);
+    const onSeeked = () => {
+      if (!draggingRef.current) setCurrentTime(audio.currentTime);
+    };
     const onLoadStart = () => {
-      setCurrentTime(0);
-      setDuration(0);
+      if (sourceRef.current === audio.currentSrc) {
+        sourceRef.current = null;
+        setCurrentTime(0);
+        setDuration(0);
+      }
     };
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
+    audio.addEventListener('seeked', onSeeked);
     audio.addEventListener('loadstart', onLoadStart);
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
+      audio.removeEventListener('seeked', onSeeked);
       audio.removeEventListener('loadstart', onLoadStart);
     };
   }, []);
@@ -82,13 +95,45 @@ export default function PlayerProvider({ children }) {
     const track = queue[currentIndex];
     if (!track?.audio_url) return;
     const audio = getAudio();
-    audio.src = track.audio_url;
-    audio.load();
-    audio
-      .play()
-      .then(() => setIsPlaying(true))
-      .catch(() => {});
+    const isCurrent = () => queue[currentIndex]?.audio_url === track.audio_url;
+    const playSource = (src) => {
+      sourceRef.current = src;
+      audio.src = src;
+      audio.load();
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {});
+    };
+
+    const cached = blobCacheRef.current[track.audio_url];
+    if (cached) {
+      playSource(cached);
+      return;
+    }
+
+    fetch(track.audio_url)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.blob();
+      })
+      .then((blob) => {
+        const objUrl = URL.createObjectURL(blob);
+        blobCacheRef.current[track.audio_url] = objUrl;
+        if (isCurrent()) playSource(objUrl);
+      })
+      .catch(() => {
+        if (isCurrent()) playSource(track.audio_url);
+      });
   }, [queue, currentIndex]);
+
+  useEffect(
+    () => () => {
+      Object.values(blobCacheRef.current).forEach((url) => URL.revokeObjectURL(url));
+      blobCacheRef.current = {};
+    },
+    []
+  );
 
   useEffect(() => {
     loadTrack();
@@ -119,8 +164,18 @@ export default function PlayerProvider({ children }) {
 
   const seek = useCallback((time) => {
     const audio = getAudio();
-    audio.currentTime = time;
-    setCurrentTime(time);
+    const max = Number.isFinite(audio.duration) ? audio.duration : Number.MAX_SAFE_INTEGER;
+    const value = Math.max(0, Math.min(time, max));
+    audio.currentTime = value;
+    setCurrentTime(value);
+  }, []);
+
+  const onSeekStart = useCallback(() => {
+    draggingRef.current = true;
+  }, []);
+
+  const onSeekEnd = useCallback(() => {
+    draggingRef.current = false;
   }, []);
 
   return (
@@ -141,6 +196,8 @@ export default function PlayerProvider({ children }) {
         toggleShuffle,
         toggleRepeat,
         seek,
+        onSeekStart,
+        onSeekEnd,
       }}
     >
       {children}
