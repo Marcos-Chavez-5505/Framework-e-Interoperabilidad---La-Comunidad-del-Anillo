@@ -38,6 +38,9 @@ Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad
 │   ├── config/                 # database (SQLite), plugins (audio/*), etc.
 │   ├── src/api/follow/         # Content-type Follow (mod. 1)
 │   ├── src/extensions/users-permissions/strapi-server.js  # bio, avatar, PUT /user/me
+│   ├── public/audio/           # MP3 locales servidos por Strapi (mod. 3)
+│   ├── public/covers/          # Portadas locales (mod. 3 y 4)
+│   ├── scripts/seed.js         # Seed de géneros/artistas/álbumes/tracks (npm run seed)
 │   └── .env.example            # .env debe crearse localmente (no se versiona)
 └── frontend/                   # React + Vite + AdminKit
     └── src/
@@ -74,35 +77,31 @@ npm run dev               # http://localhost:5173
 
 ---
 
-## Configuración necesaria en el Admin UI (IMPORTANTE)
+## Configuración (IMPORTANTE)
 
 Los content-types y permisos **de código** (Follow, campos `bio`/`avatar`, ruta `PUT /user/me`) se propagan automáticamente al arrancar Strapi.
 
-Las **concesiones de permisos** realizadas desde el Admin UI se guardan en la base de datos local (`backend/.tmp/data.db`) y **no viajan por git**. Cada integrante debe replicarlas una vez:
+Las **concesiones de permisos** se guardan en la base de datos local (`backend/.tmp/data.db`) y **no viajan por git**. El seed (`npm run seed`) las otorga automáticamente al rol **Authenticated**: si partís de una base nueva, ejecutalo una vez y todo queda habilitado.
 
-### Checklist — rol "Authenticated" (Configuración → Usuarios y permisos → Roles → Authenticated)
+### Permisos que habilita el seed — rol "Authenticated"
 
 **Módulo 1 — Autenticación** (`plugin::users-permissions.user`):
 
-- [ ] `updateMe` (edición del propio perfil, `PUT /api/user/me`)
-- [ ] `findOne` (consulta del usuario actual)
+- `updateMe` (edición del propio perfil, `PUT /api/user/me`)
+- `findOne` (consulta del usuario actual)
 
 **Módulo 2 — Búsqueda de usuarios** (`plugin::users-permissions.user`):
 
-- [ ] `find` (búsqueda por username y validación de relaciones)
-- [ ] `count`
+- `find` (búsqueda por username y validación de relaciones)
+- `count`
 
 **Módulo 2.1 — Follow** (`api::follow.follow`):
 
-- [ ] `create`
-- [ ] `delete`
-- [ ] `find`
-- [ ] `findOne`
+- `create`, `delete`, `find`, `findOne`
 
 **Módulos 3 y 4 — Música** (`api::track.track`, `api::album.album`, `api::artist.artist`, `api::genre.genre`):
 
-- [ ] `find`
-- [ ] `findOne`
+- `find`, `findOne`
 
 > Si falta `find` sobre el destinatario de una relación, Strapi v5 responde `400 Invalid key ...` (validación `throwRestrictedRelations`); es un comportamiento esperado, no un bug.
 
@@ -134,13 +133,13 @@ Reglas del content-type `Follow`: no se puede seguirse a uno mismo y no se permi
 
 Objetivo: reproducir canciones con play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
 
-1. Sembrar la biblioteca: `cd backend && node scripts/seed.js` (idempotente: si ya hay tracks, omite). Crea 5 géneros, 5 artistas, 4 álbumes y 10 tracks.
+1. Sembrar la biblioteca: `cd backend && npm run seed`. El seed **vacía y recrea** las colecciones de música (4 tracks, 3 artistas, 2 álbumes, 3 géneros) y habilita los permisos REST del rol Authenticated de los Módulos 3 y 4.
 2. En `/musica` (Biblioteca), tocar una canción: entra en la cola y aparece la barra fija (`PlayerBar`) con los controles.
 3. Probar play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
 
-El script usa `documentService` de Strapi (crea entradas sin pasar por permisos REST) y datos temáticos: `audio_url` con MP3 públicos estables (SoundHelix) como placeholder —para usar Jamendo solo hay que reemplazar los `audio_url` en `backend/scripts/seed.js`— y `cover` de picsum.photos.
+El script usa `documentService` de Strapi (crea entradas sin pasar por permisos REST). El **audio y las portadas son archivos locales** servidos por el propio Strapi desde `backend/public/` (`audio/` y `covers/`), por lo que el reproductor no hace ninguna llamada a servicios externos. La base de las URLs se controla con `APP_BASE_URL` (por defecto `http://localhost:1337`).
 
-Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), URLs de audio **externas** guardadas en Strapi (sin integrar la API de Jamendo en runtime), estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** usan rutas REST estándar de Strapi.
+Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), URLs de audio y portadas **locales** servidas por Strapi (sin integraciones externas en runtime), estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** usan rutas REST estándar de Strapi.
 
 ## Módulo 4 — Búsqueda de canciones
 
@@ -171,7 +170,7 @@ Si el navegador conserva un JWT emitido con un `JWT_SECRET` distinto (o inválid
 
 | Rama                               | Contenido                                                                             |
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
-| `feature/modulo-1-autenticacion` | Módulos 1 y 3: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
-| `feature/modulo-2-reproductor`   | Módulos 2 y 4: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
+| `feature/modulo-1-autenticacion` | Módulos 1 y 2: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
+| `feature/modulo-2-reproductor`   | Módulos 3 y 4: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
 
 > Las ramas agrupan los 4 módulos: `feature/modulo-1-autenticacion` contiene los **Módulos 1 y 2** (autenticación, perfil y follows); `feature/modulo-2-reproductor` contiene los **Módulos 3 y 4** (reproductor y búsqueda de canciones).

@@ -16,6 +16,8 @@ export default function PlayerBar() {
     toggleShuffle,
     toggleRepeat,
     seek,
+    onSeekStart,
+    onSeekEnd,
   } = usePlayer();
 
   if (!currentTrack) return null;
@@ -113,6 +115,10 @@ export default function PlayerBar() {
               step="0.1"
               value={currentTime}
               onChange={(e) => seek(Number(e.target.value))}
+              onPointerDown={onSeekStart}
+              onPointerUp={onSeekEnd}
+              onKeyUp={onSeekEnd}
+              onBlur={onSeekEnd}
               style={{ minWidth: '120px' }}
             />
             <span className="small text-secondary text-nowrap">
