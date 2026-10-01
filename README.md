@@ -147,7 +147,7 @@ Objetivo: buscar canciones por título o artista y filtrarlas por género.
 
 1. En `/musica` (Biblioteca) escribir en el buscador → `GET /api/tracks` con filtro `$or` sobre `title` y `artist.name` (`$contains`).
 2. Filtrar por género con el selector → filtro `genre.id $eq`.
-3. Los resultados se muestran ordenados (sort `title:asc`) con `populate` de artist/album/genre y permiten iniciar la reproducción (comparte la pantalla con el Módulo 2).
+3. Los resultados se muestran ordenados (sort `title:asc`) con `populate` de artist/album/genre y permiten iniciar la reproducción (comparte la pantalla con el Módulo 3).
 
 La búsqueda y el filtrado se resuelven con `filters` y `populate` **nativos** de Strapi, sin endpoints personalizados.
 
