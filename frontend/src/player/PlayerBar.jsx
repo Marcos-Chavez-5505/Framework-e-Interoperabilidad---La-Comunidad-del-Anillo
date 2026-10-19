@@ -1,6 +1,7 @@
 import { usePlayer } from './usePlayer';
 import { formatDuration } from './context';
 import PlayerIcon from './Icons';
+import TrackAttribution from './Attribution';
 
 export default function PlayerBar() {
   const {
@@ -56,6 +57,7 @@ export default function PlayerBar() {
               <div className="small text-secondary text-truncate">
                 {currentTrack.artist?.name ?? 'Desconocido'}
               </div>
+              <TrackAttribution track={currentTrack} className="d-block" />
             </div>
           </div>
 
