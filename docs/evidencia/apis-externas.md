@@ -47,7 +47,7 @@ Sobre copia de la BD y puerto 1338 (para no tocar la instancia de desarrollo):
 | `GET /api/genres`                               | 200, total 14                                          |
 | `GET /api/tracks` sin JWT                       | 403                                                    |
 | Audio del track Jamendo                         | 206, `audio/mpeg`, `content-range` total 5431999, CORS |
-| `GET /api/tracks/:id/qr`                        | 200, `image/png`, PNG de 1981 bytes                    |
+| `GET /api/tracks/:id/qr`                        | 200, `image/png`, PNG válido (~19 KB)                  |
 | Segunda llamada al QR                           | 7 ms (caché en memoria)                                |
 | QR de track sin `share_url`                     | 404 con mensaje claro                                  |
 | QR de `documentId` inexistente                  | 404 con mensaje claro                                  |
@@ -57,6 +57,14 @@ Sobre copia de la BD y puerto 1338 (para no tocar la instancia de desarrollo):
 | `npm run lint` y `npm run build` (frontend)     | OK                                                     |
 
 El usuario confirmó el funcionamiento en el navegador antes de F6.
+
+### Diseño del QR (logo, colores y forma)
+
+- Logo: `frontend/src/assets/own_svgs_icons/logo_synthos.svg`, subido una vez a `POST /qr/uploadImage` (SVG permitido) y reutilizado en el proceso con `logoMode: "clean"`.
+- Colores: `bodyColor` y ojos en `#ef2f62` (`--accent-fucsia`); `bgColor` blanco (`#FFFFFF`).
+- Forma: `body: "rounded-pointed"` para módulos con bordes redondeados. Nota: `body: "rounded"` no es válido; devuelve un PNG sin cuerpo (solo ojos y logo).
+- Tamaño: 400 px. El proxy lee el logo desde el frontend; si falta, genera el QR sin logo y registra un warning.
+- Verificado generando el PNG con el servicio de Strapi sobre una copia de la BD (19.156 bytes) e inspección visual: logo centrado, fucsia y módulos redondeados.
 
 ## Dependencias agregadas
 

@@ -43,6 +43,7 @@ main.content {
   --gradient-card: linear-gradient(180deg, #c9bcd1 0%, #8f7f9c 100%);
   --gradient-card-overlay: linear-gradient(180deg, transparent 40%, #000000cc 100%);
   --accent-pink-dark: #c7356c;
+  --accent-fucsia: #ef2f62;
 
   /* Bootstrap 5 -> paleta */
   --bs-body-bg: var(--bg-primary);
