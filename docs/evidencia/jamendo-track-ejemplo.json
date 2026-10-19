@@ -1,0 +1,29 @@
+{
+  "id": "1234567",
+  "name": "Cancion de ejemplo",
+  "duration": 214,
+  "artist_id": "987654",
+  "artist_name": "Artista de ejemplo",
+  "artist_idstr": "artista-de-ejemplo",
+  "album_id": "555000",
+  "album_name": "Album de ejemplo",
+  "license_ccurl": "",
+  "position": 1,
+  "releasedate": "2021-05-14",
+  "album_image": "https://usercontent.jamendo.com/?type=album&id=555000&width=300",
+  "image": "https://usercontent.jamendo.com/?type=album&id=555000&width=300",
+  "audio": "https://prod-1.storage.jamendo.com/?trackid=1234567&format=mp31&from=TOKEN_EFIMERO",
+  "audiodownload": "https://prod-1.storage.jamendo.com/?trackid=1234567&format=mp32&from=TOKEN_EFIMERO",
+  "prourl": "https://mp3l.jamendo.com/?trackid=1234567&format=mp31",
+  "shorturl": "https://jamendo.com/track/1234567",
+  "shareurl": "https://www.jamendo.com/track/1234567",
+  "audiodownload_allowed": true,
+  "content_id_free": false,
+  "musicinfo": {
+    "tags": {
+      "genres": ["electronic", "ambient"],
+      "instruments": ["guitar", "synthesizer"],
+      "vartags": ["instrumental", "relaxing"]
+    }
+  }
+}

@@ -57,6 +57,16 @@ No incorporar:
 * GraphQL si REST resuelve el requisito.
 * Arquitecturas distribuidas innecesarias.
 
+### Excepción autorizada
+
+Como única excepción a la restricción anterior, se autorizan exactamente estos servicios externos, con los fines indicados:
+
+* **Jamendo** (`api.jamendo.com`): seed puntual del catálogo de música. No se usa en runtime como búsqueda en vivo.
+* **QR Monkey** (`api.qrcode-monkey.com`): generación del QR de la canción, siempre a través de un endpoint proxy en Strapi.
+* **DiceBear** (`api.dicebear.com`): avatar por defecto cuando el usuario no tiene uno.
+
+Se autoriza también un único **endpoint proxy en Strapi** para QR Monkey. Cualquier otro servicio externo, microservicio, GraphQL o arquitectura distribuida sigue prohibido.
+
 ---
 
 # 3. Dominio del proyecto
@@ -574,6 +584,8 @@ No introducir GraphQL.
 
 No agregar una capa de API innecesaria entre React y Strapi.
 
+Excepción autorizada: se permite un endpoint proxy en Strapi hacia QR Monkey (`api.qrcode-monkey.com`) para generar el QR de una canción, porque QR Monkey no permite solicitudes desde el navegador (CORS). Es el único servicio externo autorizado además de Jamendo (solo seed) y DiceBear (solo avatar por defecto).
+
 ---
 
 # 12. Autenticación y seguridad
@@ -709,7 +721,7 @@ No:
 * Convertir el TP2 en una aplicación de producción.
 * Migrar SQLite a PostgreSQL.
 * Implementar GraphQL.
-* Agregar interoperabilidad externa.
+* Agregar interoperabilidad externa más allá de la excepción autorizada en §2.
 * Crear microservicios.
 * Implementar arquitectura innecesariamente compleja.
 * Crear sistemas avanzados de permisos sin necesidad.

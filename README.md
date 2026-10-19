@@ -26,7 +26,7 @@ Dominio: aplicación conceptual similar a un *Spotify colaborativo* organizada e
 | Frontend | React 19.2.8, Vite 8, React Router 7, Axios             |
 | UI       | AdminKit 3.5 (Bootstrap 5)                              |
 
-Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad con sistemas externos.
+Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad con sistemas externos, salvo la excepción autorizada para **Jamendo** (seed del catálogo), **QR Monkey** (QR de la canción vía proxy en Strapi) y **DiceBear** (avatar por defecto).
 
 ---
 
