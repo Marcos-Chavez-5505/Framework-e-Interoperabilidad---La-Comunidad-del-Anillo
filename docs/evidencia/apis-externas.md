@@ -83,6 +83,7 @@ El usuario confirmó el funcionamiento en el navegador antes de F6.
 5. **Ícono QR del template.** El SVG original traía colores fijos (`#121331`/`#fff`); se recoloreó a `currentColor`/`none` para que herede el tema.
 6. **`seed.js` original borraba el catálogo.** Se separó: permisos (`seed.js`) y catálogo (`seed:jamendo`).
 7. **Tracks históricos sin metadatos de Jamendo.** La BD real tenía 70 tracks creados por una versión anterior del seed, con `jamendo_id`, `share_url` y `license_url` vacíos; por eso el botón QR quedaba deshabilitado. Solución: `seed:jamendo` ahora backfillea `jamendo_id` y `share_url` derivándolos del `trackid` de `audio_url`, sin duplicar. Verificado sobre copia: backfill 70, creados 0, total 70. La BD real quedó reparada (70/70 con `share_url`).
+8. **El navegador cacheaba el QR 24 h.** El endpoint enviaba `Cache-Control: public, max-age=86400`; tras cambiar el diseño se seguía viendo el PNG viejo. Solución: `Cache-Control: no-store` y `?v=2` en la URL para invalidar la caché existente.
 
 ## Decisión del proxy QR y justificación CORS
 

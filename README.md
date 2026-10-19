@@ -197,7 +197,7 @@ Botón QR --REST--> Strapi --POST--> QR Monkey --> PNG               (runtime, a
 
 ### QR Monkey — QR de la canción vía proxy
 
-- Endpoint autenticado: `GET /api/tracks/:documentId/qr` → `image/png`. Caché en memoria por `documentId`, timeout de 10 s (→ `502` si falla; `404` si el track no existe o no tiene `share_url`).
+- Endpoint autenticado: `GET /api/tracks/:documentId/qr` → `image/png`. Caché en memoria por `documentId` y respuesta con `Cache-Control: no-store` para que el navegador no congele el PNG; timeout de 10 s (→ `502` si falla; `404` si el track no existe o no tiene `share_url`).
 - Diseño: logo `frontend/src/assets/own_svgs_icons/logo_synthos.svg` subido una vez a `/qr/uploadImage` (`logoMode: clean`), color `--accent-fucsia` (`#ef2f62`) en cuerpo y ojos, fondo blanco y módulos redondeados (`body: rounded-pointed`). La ruta del logo se lee desde el frontend; si no está, el proxy genera el QR sin logo y deja un warning.
 - Se usa un **proxy en Strapi** porque QR Monkey fija su CORS a `https://www.qrcode-monkey.com` y no permite `fetch` desde el navegador. El proxy aísla el cambio a un archivo del backend.
 - El QR codifica `Track.share_url` (`https://www.jamendo.com/track/<id>`).

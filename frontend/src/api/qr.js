@@ -1,6 +1,7 @@
 import { strapiClient } from './strapi';
 
 const cache = new Map();
+const QR_CACHE_VERSION = 2;
 
 export function fetchQrBlob(documentId) {
   if (cache.has(documentId)) {
@@ -11,6 +12,7 @@ export function fetchQrBlob(documentId) {
     .get(`/tracks/${documentId}/qr`, {
       responseType: 'blob',
       timeout: 15000,
+      params: { v: QR_CACHE_VERSION },
     })
     .then(({ data }) => {
       cache.set(documentId, data);

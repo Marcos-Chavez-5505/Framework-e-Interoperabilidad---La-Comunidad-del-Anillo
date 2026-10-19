@@ -8,7 +8,7 @@ module.exports = createCoreController('api::track.track', ({ strapi }) => ({
     try {
       const png = await strapi.service('api::track.track').getQrPng(documentId);
       ctx.set('Content-Type', 'image/png');
-      ctx.set('Cache-Control', 'public, max-age=86400');
+      ctx.set('Cache-Control', 'no-store');
       ctx.body = png;
     } catch (err) {
       ctx.status = err.status || 502;
