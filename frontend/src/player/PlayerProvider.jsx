@@ -20,7 +20,6 @@ export default function PlayerProvider({ children }) {
   const [duration, setDuration] = useState(0);
   const draggingRef = useRef(false);
   const sourceRef = useRef(null);
-  const blobCacheRef = useRef({});
 
   const currentTrack = queue[currentIndex] ?? null;
 
@@ -34,24 +33,35 @@ export default function PlayerProvider({ children }) {
     const onSeeked = () => {
       if (!draggingRef.current) setCurrentTime(audio.currentTime);
     };
-    const onLoadStart = () => {
-      if (sourceRef.current === audio.currentSrc) {
-        sourceRef.current = null;
-        setCurrentTime(0);
-        setDuration(0);
-      }
-    };
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('seeked', onSeeked);
-    audio.addEventListener('loadstart', onLoadStart);
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
       audio.removeEventListener('seeked', onSeeked);
-      audio.removeEventListener('loadstart', onLoadStart);
     };
   }, []);
+
+  useEffect(() => {
+    const audio = getAudio();
+    const track = queue[currentIndex];
+    if (!track?.audio_url) return;
+
+    if (sourceRef.current !== track.audio_url) {
+      sourceRef.current = track.audio_url;
+      audio.src = track.audio_url;
+      audio.load();
+      setCurrentTime(0);
+      setDuration(0);
+    }
+
+    if (isPlaying) {
+      audio.play().catch(() => {});
+    } else {
+      audio.pause();
+    }
+  }, [queue, currentIndex, isPlaying]);
 
   const next = useCallback(() => {
     setCurrentIndex((i) => {
@@ -90,63 +100,6 @@ export default function PlayerProvider({ children }) {
     audio.addEventListener('ended', onEnded);
     return () => audio.removeEventListener('ended', onEnded);
   }, [onEnded]);
-
-  const loadTrack = useCallback(() => {
-    const track = queue[currentIndex];
-    if (!track?.audio_url) return;
-    const audio = getAudio();
-    const isCurrent = () => queue[currentIndex]?.audio_url === track.audio_url;
-    const playSource = (src) => {
-      sourceRef.current = src;
-      audio.src = src;
-      audio.load();
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => {});
-    };
-
-    const cached = blobCacheRef.current[track.audio_url];
-    if (cached) {
-      playSource(cached);
-      return;
-    }
-
-    fetch(track.audio_url)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
-        const objUrl = URL.createObjectURL(blob);
-        blobCacheRef.current[track.audio_url] = objUrl;
-        if (isCurrent()) playSource(objUrl);
-      })
-      .catch(() => {
-        if (isCurrent()) playSource(track.audio_url);
-      });
-  }, [queue, currentIndex]);
-
-  useEffect(
-    () => () => {
-      Object.values(blobCacheRef.current).forEach((url) => URL.revokeObjectURL(url));
-      blobCacheRef.current = {};
-    },
-    []
-  );
-
-  useEffect(() => {
-    loadTrack();
-  }, [loadTrack]);
-
-  useEffect(() => {
-    const audio = getAudio();
-    if (isPlaying) {
-      audio.play().catch(() => {});
-    } else {
-      audio.pause();
-    }
-  }, [isPlaying]);
 
   const playQueue = useCallback((tracks, index = 0) => {
     if (!tracks?.length) return;
