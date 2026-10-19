@@ -589,11 +589,14 @@ export interface ApiTrackTrack extends Struct.CollectionTypeSchema {
       Schema.Attribute.Private;
     duration: Schema.Attribute.Integer;
     genre: Schema.Attribute.Relation<'manyToOne', 'api::genre.genre'>;
+    jamendo_id: Schema.Attribute.String & Schema.Attribute.Unique;
+    license_url: Schema.Attribute.String;
     locale: Schema.Attribute.String & Schema.Attribute.Private;
     localizations: Schema.Attribute.Relation<'oneToMany', 'api::track.track'> &
       Schema.Attribute.Private;
     publishedAt: Schema.Attribute.DateTime;
     release_date: Schema.Attribute.Date;
+    share_url: Schema.Attribute.String;
     title: Schema.Attribute.String & Schema.Attribute.Required;
     updatedAt: Schema.Attribute.DateTime;
     updatedBy: Schema.Attribute.Relation<'oneToOne', 'admin::user'> &

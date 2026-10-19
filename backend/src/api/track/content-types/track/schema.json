@@ -28,6 +28,16 @@
     "release_date": {
       "type": "date"
     },
+    "jamendo_id": {
+      "type": "string",
+      "unique": true
+    },
+    "license_url": {
+      "type": "string"
+    },
+    "share_url": {
+      "type": "string"
+    },
     "artist": {
       "type": "relation",
       "relation": "manyToOne",
