@@ -6,6 +6,42 @@ import PlayerIcon from '../player/Icons';
 import TrackAttribution from '../player/Attribution';
 import useFeather from '../hooks/useFeather';
 
+function buildTrackParams(search, genreId) {
+  const params = {
+    fields: ['id', 'title', 'duration', 'audio_url', 'cover', 'release_date', 'jamendo_id', 'license_url', 'share_url'],
+    populate: {
+      artist: { fields: ['name'] },
+      album: { fields: ['title'] },
+      genre: { fields: ['name'] },
+    },
+    pagination: { pageSize: 50 },
+    sort: ['title:asc'],
+  };
+
+  const q = search.trim();
+  const filters = {};
+  if (q) {
+    filters.$or = [
+      { title: { $contains: q } },
+      { artist: { name: { $contains: q } } },
+    ];
+  }
+  if (genreId) {
+    filters.genre = { id: { $eq: Number(genreId) } };
+  }
+  if (Object.keys(filters).length) {
+    params.filters = filters;
+  }
+
+  return params;
+}
+
+function fetchTracks(search = '', genreId = '') {
+  return strapiClient
+    .get('/tracks', { params: buildTrackParams(search, genreId) })
+    .then(({ data }) => data.data);
+}
+
 function TrackRow({ track, indexInList, playing, onPlay }) {
   return (
     <li className="list-group-item d-flex align-items-center gap-3">
@@ -57,47 +93,20 @@ export default function Biblioteca() {
   const [genreId, setGenreId] = useState('');
   const [tracks, setTracks] = useState([]);
   const [genres, setGenres] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const loadTracks = useCallback(async () => {
+  const loadTracks = useCallback(async (search = '', filterGenre = '') => {
     setLoading(true);
     setError('');
-    const params = {
-      fields: ['id', 'title', 'duration', 'audio_url', 'cover', 'release_date', 'jamendo_id', 'license_url', 'share_url'],
-      populate: {
-        artist: { fields: ['name'] },
-        album: { fields: ['title'] },
-        genre: { fields: ['name'] },
-      },
-      pagination: { pageSize: 50 },
-      sort: ['title:asc'],
-    };
-
-    const q = query.trim();
-    const filters = {};
-    if (q) {
-      filters.$or = [
-        { title: { $contains: q } },
-        { artist: { name: { $contains: q } } },
-      ];
-    }
-    if (genreId) {
-      filters.genre = { id: { $eq: Number(genreId) } };
-    }
-    if (Object.keys(filters).length) {
-      params.filters = filters;
-    }
-
     try {
-      const { data } = await strapiClient.get('/tracks', { params });
-      setTracks(data.data);
+      setTracks(await fetchTracks(search, filterGenre));
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
-  }, [query, genreId]);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -118,9 +127,27 @@ export default function Biblioteca() {
     };
   }, []);
 
+  // Carga inicial: las canciones se piden al entrar, sin que el usuario presione "Buscar".
+  useEffect(() => {
+    let active = true;
+    fetchTracks()
+      .then((data) => {
+        if (active) setTracks(data);
+      })
+      .catch((err) => {
+        if (active) setError(getErrorMessage(err));
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleSearch = (event) => {
     event.preventDefault();
-    loadTracks();
+    loadTracks(query, genreId);
   };
 
   const handlePlay = (index) => {
