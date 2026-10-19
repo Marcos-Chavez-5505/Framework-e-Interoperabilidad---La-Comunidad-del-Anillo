@@ -66,6 +66,41 @@ function firstGenre(track) {
   return genres[0] || null;
 }
 
+function shareUrlFor(jamendoId) {
+  return `https://www.jamendo.com/track/${jamendoId}`;
+}
+
+function jamendoIdFromAudioUrl(audioUrl) {
+  if (!audioUrl) return null;
+  try {
+    return new URL(audioUrl).searchParams.get('trackid');
+  } catch {
+    return null;
+  }
+}
+
+// Repara filas creadas por versiones anteriores del seed, que no guardaban
+// jamendo_id/share_url. El trackid viaja en audio_url, así que se puede derivar.
+async function backfillTrackMetadata(strapi) {
+  const docs = strapi.documents('api::track.track');
+  const items = await docs.findMany({
+    fields: ['documentId', 'jamendo_id', 'audio_url', 'share_url'],
+  });
+  let fixed = 0;
+  for (const item of items) {
+    const jamendoId = item.jamendo_id || jamendoIdFromAudioUrl(item.audio_url);
+    if (!jamendoId) continue;
+    const shareUrl = shareUrlFor(jamendoId);
+    if (item.jamendo_id === jamendoId && item.share_url === shareUrl) continue;
+    await docs.update({
+      documentId: item.documentId,
+      data: { jamendo_id: jamendoId, share_url: shareUrl },
+    });
+    fixed += 1;
+  }
+  return fixed;
+}
+
 async function findOrCreateGenre(strapi, cache, name) {
   if (!name) return null;
   const key = name.trim();
@@ -124,7 +159,7 @@ async function upsertTrack(strapi, track, genreId, artistId, albumId) {
     release_date: track.releasedate || null,
     jamendo_id: jamendoId,
     license_url: track.license_ccurl || '',
-    share_url: track.shareurl || '',
+    share_url: track.shareurl || shareUrlFor(jamendoId),
     genre: genreId || null,
     artist: artistId || null,
     album: albumId || null,
@@ -174,6 +209,8 @@ async function main() {
   const strapi = createStrapi();
   await strapi.load();
 
+  const backfilled = await backfillTrackMetadata(strapi);
+
   const genreCache = new Map();
   const artistCache = new Map();
   const albumCache = new Map();
@@ -194,6 +231,7 @@ async function main() {
 
   console.log('Seed Jamendo completado:');
   console.log(`  Tracks procesados : ${tracks.length} (creados: ${created}, actualizados: ${updated})`);
+  console.log(`  Backfill metadata : ${backfilled}`);
   console.log(`  Géneros evaluados : ${genreCache.size}`);
   console.log(`  Total tracks      : ${totalTracks}`);
   console.log(`  Total géneros     : ${totalGenres}`);

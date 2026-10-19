@@ -74,3 +74,4 @@ No se usa el parámetro `id` (por los problemas de la sección anterior).
 
 - **F2.5 (resuelto):** `backend/scripts/seed.js` quedó solo con la concesión de permisos al rol Authenticated; ya no vacía ni recrea las colecciones de música.
 - **F3.4 (resuelto):** se eliminaron los 4 tracks locales (`jamendo_id` NULL) y sus assets (`backend/public/audio`, `backend/public/covers`). Estado actual: **70 tracks, 0 locales, 14 géneros**.
+- **Backfill de metadatos (post-F6):** los 70 tracks históricos tenían `jamendo_id`/`share_url` vacíos porque fueron creados por una versión previa del seed. `seed-jamendo.js` ahora los deriva del `trackid` de `audio_url` y repara filas existentes sin duplicar. Verificado sobre copia: backfill 70, creados 0, total 70. La BD real quedó reparada (70/70 con `share_url`).

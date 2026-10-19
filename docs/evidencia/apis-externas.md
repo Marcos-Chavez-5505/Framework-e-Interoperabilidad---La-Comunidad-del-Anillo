@@ -74,6 +74,7 @@ El usuario confirmó el funcionamiento en el navegador antes de F6.
 4. **`license_ccurl` no siempre viene completo.** Si falta, la UI enlaza a la página del track en Jamendo y no afirma licencia Creative Commons.
 5. **Ícono QR del template.** El SVG original traía colores fijos (`#121331`/`#fff`); se recoloreó a `currentColor`/`none` para que herede el tema.
 6. **`seed.js` original borraba el catálogo.** Se separó: permisos (`seed.js`) y catálogo (`seed:jamendo`).
+7. **Tracks históricos sin metadatos de Jamendo.** La BD real tenía 70 tracks creados por una versión anterior del seed, con `jamendo_id`, `share_url` y `license_url` vacíos; por eso el botón QR quedaba deshabilitado. Solución: `seed:jamendo` ahora backfillea `jamendo_id` y `share_url` derivándolos del `trackid` de `audio_url`, sin duplicar. Verificado sobre copia: backfill 70, creados 0, total 70. La BD real quedó reparada (70/70 con `share_url`).
 
 ## Decisión del proxy QR y justificación CORS
 
