@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { getErrorMessage, strapiClient } from '../api/strapi';
+import { avatarUrl, onAvatarError } from '../utils/avatarUrl';
 import useFeather from '../hooks/useFeather';
 
 export default function Perfil() {
@@ -37,20 +38,12 @@ export default function Perfil() {
       <div className="col-12 col-lg-4">
         <div className="card">
           <div className="card-body text-center">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt={user.username}
-                className="avatar avatar-xl rounded-circle mb-3"
-              />
-            ) : (
-              <div
-                className="avatar avatar-xl rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
-                style={{ fontSize: '2rem' }}
-              >
-                {(user?.username ?? '?').charAt(0).toUpperCase()}
-              </div>
-            )}
+            <img
+              src={avatarUrl(user)}
+              alt={user?.username}
+              onError={onAvatarError}
+              className="avatar avatar-xl rounded-circle mb-3"
+            />
             <h1 className="h5 mb-1">{user?.username}</h1>
             <p className="text-secondary mb-1">{user?.email}</p>
             {user?.bio && <p className="mb-0 text-muted">{user.bio}</p>}

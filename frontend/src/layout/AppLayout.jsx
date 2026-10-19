@@ -1,5 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/useAuth';
+import { avatarUrl, onAvatarError } from '../utils/avatarUrl';
 import useFeather from '../hooks/useFeather';
 import PlayerBar from '../player/PlayerBar';
 
@@ -35,25 +36,18 @@ export default function AppLayout() {
         <div className="sidebar-body px-3 pt-2">
           <div className="nav-item py-2">
             <Link to="/perfil" className="nav-link d-flex align-items-center gap-3">
-              <div className="avatar">
-                {user?.avatar ? (
-                  <img
-                    src={user.avatar}
-                    alt={user.username}
-                    style={{
-                      width: '2rem',
-                      height: '2rem',
-                      objectFit: 'cover',
-                      borderRadius: '50%',
-                      display: 'block',
-                    }}
-                  />
-                ) : (
-                  <div className="avatar-sm bg-primary text-white d-flex align-items-center justify-content-center">
-                    {String(user?.username ?? '?').charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
+              <img
+                src={avatarUrl(user)}
+                alt={user?.username}
+                onError={onAvatarError}
+                style={{
+                  width: '2rem',
+                  height: '2rem',
+                  objectFit: 'cover',
+                  borderRadius: '50%',
+                  display: 'block',
+                }}
+              />
               <div className="d-flex flex-column">
                 <span
                   className="fs-7 overflow-hidden text-nowrap"
