@@ -26,7 +26,7 @@ Dominio: aplicación conceptual similar a un *Spotify colaborativo* organizada e
 | Frontend | React 19.2.8, Vite 8, React Router 7, Axios             |
 | UI       | AdminKit 3.5 (Bootstrap 5)                              |
 
-Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad con sistemas externos.
+Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad con sistemas externos, salvo la excepción autorizada para **Jamendo** (seed del catálogo), **QR Monkey** (QR de la canción vía proxy en Strapi) y **DiceBear** (avatar por defecto).
 
 ---
 
@@ -35,19 +35,23 @@ Se usa exclusivamente **REST** (sin GraphQL). No se implementa interoperabilidad
 ```text
 /
 ├── backend/                    # Strapi 5 (REST + SQLite)
-│   ├── config/                 # database (SQLite), plugins (audio/*), etc.
-│   ├── src/api/follow/         # Content-type Follow (mod. 1)
+│   ├── config/                 # database (SQLite), plugins, server, etc.
+│   ├── src/api/follow/         # Content-type Follow (mod. 2.1)
+│   ├── src/api/track/          # Track + ruta custom GET /tracks/:id/qr (APIs externas)
 │   ├── src/extensions/users-permissions/strapi-server.js  # bio, avatar, PUT /user/me
-│   ├── public/audio/           # MP3 locales servidos por Strapi (mod. 3)
-│   ├── public/covers/          # Portadas locales (mod. 3 y 4)
-│   ├── scripts/seed.js         # Seed de géneros/artistas/álbumes/tracks (npm run seed)
+│   ├── data/jamendo-seed-ids.json  # Catálogo fijo de Jamendo
+│   ├── scripts/seed.js         # Otorga permisos REST al rol Authenticated (npm run seed)
+│   ├── scripts/seed-jamendo.js # Siembra el catálogo desde Jamendo (npm run seed:jamendo)
 │   └── .env.example            # .env debe crearse localmente (no se versiona)
 └── frontend/                   # React + Vite + AdminKit
     └── src/
-        ├── api/strapi.js       # Cliente axios (JWT desde localStorage)
+        ├── api/                # strapi.js (axios + JWT), qr.js (QR como blob)
         ├── auth/               # AuthProvider, useAuth, PrivateRoute
+        ├── components/         # QrModal (popover del QR)
         ├── layout/AppLayout.jsx# Layout AdminKit (sidebar + navbar)
-        └── pages/              # Login, Register, Perfil, BuscarPersonas, Inicio
+        ├── player/             # PlayerProvider, PlayerBar, Attribution, Icons
+        ├── utils/avatarUrl.js  # Avatar por defecto (DiceBear) + respaldo local
+        └── pages/              # Login, Register, Perfil, BuscarPersonas, Inicio, Biblioteca
 ```
 
 ---
@@ -64,6 +68,14 @@ npm run develop           # http://localhost:1337  (Admin UI: /admin)
 ```
 
 `backend/.env` **no se versiona** (está en `.gitignore`). Cada integrante debe crearlo localmente con sus claves. La base de datos es **SQLite** (archivo `backend/.tmp/data.db`, también ignorado y creado al primer arranque).
+
+Si va a sembrar el catálogo de Jamendo, completa también `JAMENDO_CLIENT_ID` en `backend/.env` (ver *APIs externas*). Con Strapi detenido, una vez:
+
+```bash
+cd backend
+npm run seed           # otorga los permisos REST del rol Authenticated
+npm run seed:jamendo   # siembra el catálogo del reproductor (requiere JAMENDO_CLIENT_ID)
+```
 
 ### 2. Frontend (React + Vite)
 
@@ -103,6 +115,10 @@ Las **concesiones de permisos** se guardan en la base de datos local (`backend/.
 
 - `find`, `findOne`
 
+**Módulo 3 — QR de la canción** (`api::track.track`):
+
+- `qr` (proxy a QR Monkey, `GET /api/tracks/:documentId/qr`)
+
 > Si falta `find` sobre el destinatario de una relación, Strapi v5 responde `400 Invalid key ...` (validación `throwRestrictedRelations`); es un comportamiento esperado, no un bug.
 
 ---
@@ -133,13 +149,13 @@ Reglas del content-type `Follow`: no se puede seguirse a uno mismo y no se permi
 
 Objetivo: reproducir canciones con play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
 
-1. Sembrar la biblioteca: `cd backend && npm run seed`. El seed **vacía y recrea** las colecciones de música (4 tracks, 3 artistas, 2 álbumes, 3 géneros) y habilita los permisos REST del rol Authenticated de los Módulos 3 y 4.
+1. Sembrar permisos: `cd backend && npm run seed` (otorga los permisos REST del rol Authenticated de los Módulos 3 y 4; ya **no** toca el catálogo). Sembrar catálogo: `npm run seed:jamendo` (ver *APIs externas*).
 2. En `/musica` (Biblioteca), tocar una canción: entra en la cola y aparece la barra fija (`PlayerBar`) con los controles.
 3. Probar play/pause, siguiente/anterior, modo aleatorio, repetición y barra de progreso.
 
-El script usa `documentService` de Strapi (crea entradas sin pasar por permisos REST). El **audio y las portadas son archivos locales** servidos por el propio Strapi desde `backend/public/` (`audio/` y `covers/`), por lo que el reproductor no hace ninguna llamada a servicios externos. La base de las URLs se controla con `APP_BASE_URL` (por defecto `http://localhost:1337`).
+El reproductor usa un `<audio>` de HTML5 con **streaming progresivo**: asigna `audio_url` directo y empieza a sonar apenas recibe datos; cambiar de canción aborta la carga previa (no se descarga el archivo completo antes de sonar). El catálogo se siembra una vez desde **Jamendo** (`npm run seed:jamendo`); el audio y las portadas se cargan desde URLs remotas (storage de Jamendo). El detalle está en *APIs externas*.
 
-Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), URLs de audio y portadas **locales** servidas por Strapi (sin integraciones externas en runtime), estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** usan rutas REST estándar de Strapi.
+Decisiones del módulo: reproducción con **HTML5 `<audio>`** (sin librerías extra), catálogo fijo en Strapi sembrado desde Jamendo, estado con **Context API** y barra fija dentro del layout. Los content-types **Track/Album/Artist/Genre** usan rutas REST estándar de Strapi.
 
 ## Módulo 4 — Búsqueda de canciones
 
@@ -157,12 +173,59 @@ Si el navegador conserva un JWT emitido con un `JWT_SECRET` distinto (o inválid
 
 ---
 
+## APIs externas (Jamendo, QR Monkey, DiceBear)
+
+Autorizadas de forma **excepcional** (`AGENTS.md` §2); cualquier otro servicio externo sigue prohibido. Se usan sin agregar dependencias nuevas.
+
+### Flujo
+
+```text
+[scripts/seed-jamendo.js] --GET--> Jamendo API --> Strapi (Track)   (una vez, en desarrollo)
+React --REST--> Strapi                                              (runtime)
+<audio> --stream--> storage de Jamendo                              (runtime)
+Botón QR --REST--> Strapi --POST--> QR Monkey --> PNG               (runtime, a demanda)
+<img> --GET--> DiceBear                                             (runtime, si no hay avatar)
+```
+
+### Jamendo — seed del catálogo
+
+- Variable `JAMENDO_CLIENT_ID` en `backend/.env` (obligatoria). `.env.example` la incluye **vacía**; el valor real nunca se versiona.
+- Comando: `cd backend && npm run seed:jamendo`.
+- El catálogo fijo vive en `backend/data/jamendo-seed-ids.json` (70 ids). Cada corrida consulta Jamendo por tags y hace upsert **solo** de los ids del manifest, con `documentService` (idempotente: no duplica ni crece el catálogo).
+- Mapeo de campos: `name→title`, `duration` (segundos) → `duration`, `audio→audio_url`, `image→cover`, `releasedate→release_date`, `shareurl→share_url`, `license_ccurl→license_url` (puede venir vacío), `artist_name→Artist`, `album_name→Album`, `musicinfo.tags.genres→Genre` (un género por track: el primero del array).
+- El campo `next` de la respuesta de Jamendo no se guarda ni se reenvía al cliente.
+
+### QR Monkey — QR de la canción vía proxy
+
+- Endpoint autenticado: `GET /api/tracks/:documentId/qr` → `image/png`. Caché en memoria por `documentId`, timeout de 10 s (→ `502` si falla; `404` si el track no existe o no tiene `share_url`).
+- Se usa un **proxy en Strapi** porque QR Monkey fija su CORS a `https://www.qrcode-monkey.com` y no permite `fetch` desde el navegador. El proxy aísla el cambio a un archivo del backend.
+- El QR codifica `Track.share_url` (`https://www.jamendo.com/track/<id>`).
+- Frontend: `frontend/src/api/qr.js` pide el PNG como `blob` (con JWT) y `frontend/src/components/QrModal.jsx` lo muestra en un popover; el botón QR vive en `PlayerBar`.
+
+### DiceBear — avatar por defecto
+
+- `frontend/src/utils/avatarUrl.js`: si el usuario no tiene `avatar`, se usa `https://api.dicebear.com/10.x/thumbs/svg?seed=<id>` (semilla = `id`, no `username`, para que sea estable entre recargas). Con `onerror`, un avatar local de respaldo (data URI).
+
+### Dependencias
+
+Ninguna adicional: `fetch` global de Node para el proxy a QR Monkey, `axios` (ya presente) para el frontend y `<img>` plano para DiceBear.
+
+### Limitaciones
+
+- El **audio** apunta al storage de Jamendo (`audio_url` con token): si la URL caduca, volver a correr `npm run seed:jamendo` la refresca. La app depende de Jamendo para el audio en *runtime*.
+- `license_ccurl` no siempre viene completo: si `license_url` está vacío, la UI enlaza a la página del track en Jamendo y **no** afirma que sea Creative Commons.
+- QR Monkey se documenta vía RapidAPI; el endpoint abierto puede cambiar o limitarse.
+- DiceBear no garantiza disponibilidad: siempre hay respaldo local.
+
+---
+
 ## Integración de AdminKit (evidencia para el informe)
 
 - Estado original: template AdminKit `@adminkit/core` importado tal cual (CSS `app.css` + JS `app.js`).
 - Adaptación: el layout reconstruye la estructura HTML de AdminKit (`.wrapper`, `.sidebar`, `.navbar`, `.content`, `.footer`) dentro de componentes React en `frontend/src/layout/AppLayout.jsx`.
 - Los íconos *(feather)* vienen embebidos en `app.js` del template; se reemplazan con `window.feather.replace()` vía `src/hooks/useFeather.js`.
 - El CSS del template de Vite (`index.css` original) se reemplazó por un reset mínimo al que se suman los overrides del tema (paleta oscura + acento pink) desde `frontend/src/index.css`, importado **después** de `app.css` para ganar en cascada.
+- QR (APIs externas): en lugar de un modal con JS de Bootstrap, se agregó un **popover propio** (`.qr-popover`, `.qr-close` en `frontend/src/index.css`) anclado arriba y a la izquierda de la barra del reproductor, con cierre circular. Se reutilizan utilidades de Bootstrap/AdminKit (`.card`, `.btn`, `.alert`, `spinner-border`, `btn-outline-secondary`).
 
 ---
 
@@ -172,5 +235,6 @@ Si el navegador conserva un JWT emitido con un `JWT_SECRET` distinto (o inválid
 | ---------------------------------- | ------------------------------------------------------------------------------------- |
 | `feature/modulo-1-autenticacion` | Módulos 1 y 2: backend (auth, perfil, follows) + frontend (layout AdminKit + vistas) |
 | `feature/modulo-2-reproductor`   | Módulos 3 y 4: backend (Track/Album/Artist/Genre) + frontend (player + biblioteca)   |
+| `feature/apis-externas`          | APIs externas: Jamendo (seed + atribución), QR Monkey (proxy) y DiceBear (avatar)    |
 
 > Las ramas agrupan los 4 módulos: `feature/modulo-1-autenticacion` contiene los **Módulos 1 y 2** (autenticación, perfil y follows); `feature/modulo-2-reproductor` contiene los **Módulos 3 y 4** (reproductor y búsqueda de canciones).

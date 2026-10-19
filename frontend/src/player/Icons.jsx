@@ -5,6 +5,7 @@ import nextTrackSvg from '../assets/own_svgs_icons/next_track.svg?raw';
 import shuffleSvg from '../assets/own_svgs_icons/shuffle.svg?raw';
 import repeatSvg from '../assets/own_svgs_icons/repeat.svg?raw';
 import musicNoteSvg from '../assets/own_svgs_icons/music_note.svg?raw';
+import qrScanSvg from '../assets/own_svgs_icons/qr-code-scan.svg?raw';
 
 const toCurrentColor = (raw) =>
   raw
@@ -21,6 +22,9 @@ const ICONS = {
   shuffle: toCurrentColor(shuffleSvg),
   repeat: toCurrentColor(repeatSvg),
   musicNote: toCurrentColor(musicNoteSvg),
+  qr: qrScanSvg
+    .replaceAll('fill="#121331"', 'fill="currentColor"')
+    .replaceAll('fill="#fff"', 'fill="none"'),
 };
 
 export default function PlayerIcon({ name, size = 22, className = '' }) {

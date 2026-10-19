@@ -3,6 +3,7 @@ import { strapiClient, getErrorMessage } from '../api/strapi';
 import { usePlayer } from '../player/usePlayer';
 import { formatDuration } from '../player/context';
 import PlayerIcon from '../player/Icons';
+import TrackAttribution from '../player/Attribution';
 import useFeather from '../hooks/useFeather';
 
 function TrackRow({ track, indexInList, playing, onPlay }) {
@@ -32,6 +33,7 @@ function TrackRow({ track, indexInList, playing, onPlay }) {
           {track.album?.title ? ` · ${track.album.title}` : ''}
           {track.genre?.name ? ` · ${track.genre.name}` : ''}
         </span>
+        <TrackAttribution track={track} />
       </div>
       <span className="small text-secondary text-nowrap">
         {formatDuration(track.duration)}
@@ -62,7 +64,7 @@ export default function Biblioteca() {
     setLoading(true);
     setError('');
     const params = {
-      fields: ['id', 'title', 'duration', 'audio_url', 'cover', 'release_date'],
+      fields: ['id', 'title', 'duration', 'audio_url', 'cover', 'release_date', 'jamendo_id', 'license_url', 'share_url'],
       populate: {
         artist: { fields: ['name'] },
         album: { fields: ['title'] },

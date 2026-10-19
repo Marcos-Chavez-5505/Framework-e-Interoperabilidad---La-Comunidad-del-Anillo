@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../auth/useAuth';
 import { getErrorMessage, strapiClient } from '../api/strapi';
+import { avatarUrl, onAvatarError } from '../utils/avatarUrl';
 import useFeather from '../hooks/useFeather';
 
 function loadFollowsMap(viewerId) {
@@ -29,20 +30,12 @@ function UserRow({ persona, isFollowing, onFollow, onUnfollow, busy, viewerId })
 
   return (
     <li className="list-group-item d-flex align-items-center gap-3">
-      {persona.avatar ? (
-        <img
-          src={persona.avatar}
-          alt={persona.username}
-          className="avatar rounded-circle"
-        />
-      ) : (
-        <div
-          className="avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-          style={{ fontSize: '1rem' }}
-        >
-          {String(persona.username ?? '?').charAt(0).toUpperCase()}
-        </div>
-      )}
+      <img
+        src={avatarUrl(persona)}
+        alt={persona.username}
+        onError={onAvatarError}
+        className="avatar rounded-circle"
+      />
       <div className="d-flex flex-column min-w-0 flex-grow-1">
         <span className="fw-semibold text-truncate">{persona.username}</span>
         <span className="text-secondary small text-truncate">
