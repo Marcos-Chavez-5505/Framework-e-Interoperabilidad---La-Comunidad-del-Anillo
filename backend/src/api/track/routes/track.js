@@ -4,6 +4,15 @@ module.exports = {
   routes: [
     {
       method: 'GET',
+      path: '/tracks/:documentId/qr',
+      handler: 'track.qr',
+      config: {
+        policies: [],
+        middlewares: [],
+      },
+    },
+    {
+      method: 'GET',
       path: '/tracks',
       handler: 'track.find',
       config: {

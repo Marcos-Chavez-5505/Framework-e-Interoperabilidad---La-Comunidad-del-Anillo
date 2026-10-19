@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { usePlayer } from './usePlayer';
 import { formatDuration } from './context';
 import PlayerIcon from './Icons';
 import TrackAttribution from './Attribution';
+import QrModal from '../components/QrModal';
 
 export default function PlayerBar() {
   const {
@@ -20,6 +22,8 @@ export default function PlayerBar() {
     onSeekStart,
     onSeekEnd,
   } = usePlayer();
+
+  const [showQr, setShowQr] = useState(false);
 
   if (!currentTrack) return null;
 
@@ -103,6 +107,20 @@ export default function PlayerBar() {
             >
               <PlayerIcon name="shuffle" />
             </button>
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center"
+              onClick={() => setShowQr(true)}
+              disabled={!currentTrack.share_url}
+              aria-label="Código QR"
+              title={
+                currentTrack.share_url
+                  ? 'Ver código QR'
+                  : 'La canción no tiene enlace de Jamendo'
+              }
+            >
+              <PlayerIcon name="qr" size={18} />
+            </button>
           </div>
 
           <div className="d-flex align-items-center gap-2 w-100 w-lg-auto">
@@ -129,6 +147,13 @@ export default function PlayerBar() {
           </div>
         </div>
       </div>
+      {showQr && (
+        <QrModal
+          key={currentTrack.documentId}
+          track={currentTrack}
+          onClose={() => setShowQr(false)}
+        />
+      )}
     </div>
   );
 }

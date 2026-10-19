@@ -3,6 +3,7 @@ const { createStrapi } = require('@strapi/strapi');
 const PERMISSIONS = [
   'api::track.track.find',
   'api::track.track.findOne',
+  'api::track.track.qr',
   'api::album.album.find',
   'api::album.album.findOne',
   'api::artist.artist.find',
